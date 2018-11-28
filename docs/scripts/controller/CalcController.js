@@ -23,7 +23,16 @@ class CalcController{
 		setInterval(() => {
 			this.setDisplayDateTime();	
 		}, 1000);
-	}		
+	}
+
+	setLastOperation(value){
+		this._operation[this._operation.length -1] = value;
+	}
+
+	//Pega ultimo elemonto do Array
+	getLastOperation(){
+		return this._operation[this._operation.length -1];
+	}
 
 	clearAll(){
 		//Limpa a lista de itens
@@ -34,12 +43,40 @@ class CalcController{
 		this._operation.pop();
 	}
 	setError(){
+		//Mostra no Display o nome ERRO
 		this.displayCalc = "Error";
 	}
 
+	isOperator(value){
+		//verifica se o valor informado esta dentro deste array
+		return (['+', '-', '*', '%', '/'].indexOf(value) > -1);
+	}
+
 	addOperation(value){
+
+		console.log("A", isNaN(this.getLastOperation()));
+
+		//Valida se o ultimo item da lista é um numero
+		if(isNaN(this.getLastOperation())){
+			
+			//Valida o ultimo item e verifica qual foi digitado
+			if(this.isOperator(value)){
+				//Troca o operador anterior
+				this.setLastOperation(value);
+			}else if(isNaN(value)){
+				console.log(value);
+			}else{
+				this._operation.push(value);
+			}
+
+		} else{
+			//transforma o numero anterior e o digitado em string e concatena
+			let newValue = this.getLastOperation().toString() + value.toString();
+			this.setLastOperation(parseInt(newValue));
+		}
+
 		//Adiciona um item na lista
-		this._operation.push(value);
+		//this._operation.push(value);
 
 		console.log(this._operation);
 	}
@@ -53,24 +90,29 @@ class CalcController{
 				this.clearEntry();
 				break;
 			case "soma":
-
+				this.addOperation("+");
 				break;
 			case "subtracao":
-				
+				this.addOperation("-");
 				break;
 			case "divisao":
-				
+				this.addOperation("/");
 				break;
 			case "multiplicacao":
-				
+				this.addOperation("*");
 				break;
 			case "porcento":
-				
+				this.addOperation("%");
 				break;
 			case "igual":
 				
 				break;	
 
+			case "ponto":
+				this.addOperation(".");
+				break;	
+	
+				
 			case "0":
 			case "1":
 			case "2":
@@ -89,7 +131,7 @@ class CalcController{
 				break;						
 		}
 	}
-
+	//Cria uma lista de eventos a ser executada
 	addEventListenerAll(element, events, fn){
 		events.split(' ').forEach(event => {
 			element.addEventListener(event, fn, false);

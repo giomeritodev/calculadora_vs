@@ -25,6 +25,22 @@ class CalcController{
 		}, 1000);
 	}
 
+	pushOperation(value){
+		this._operation.push(value);
+
+		if(this._operation.length > 3){
+			this.calc();			
+		}
+	}
+
+	calc(){
+		let last = this._operation.pop();
+
+		let result = eval(this._operation.join(""));
+
+		this._operation = [result, last];
+	}
+
 	setLastOperation(value){
 		this._operation[this._operation.length -1] = value;
 	}
@@ -54,8 +70,6 @@ class CalcController{
 
 	addOperation(value){
 
-		console.log("A", isNaN(this.getLastOperation()));
-
 		//Valida se o ultimo item da lista é um numero
 		if(isNaN(this.getLastOperation())){
 			
@@ -64,21 +78,28 @@ class CalcController{
 				//Troca o operador anterior
 				this.setLastOperation(value);
 			}else if(isNaN(value)){
-				console.log(value);
+				console.log("Outra coisa", value);
 			}else{
-				this._operation.push(value);
+				this.pushOperation(value);
 			}
 
 		} else{
-			//transforma o numero anterior e o digitado em string e concatena
-			let newValue = this.getLastOperation().toString() + value.toString();
-			this.setLastOperation(parseInt(newValue));
+
+			if(this.isOperator(value)){
+				this.pushOperation(value);
+			}else{
+				//transforma o numero anterior e o digitado em string e concatena
+				let newValue = this.getLastOperation().toString() + value.toString();
+				this.setLastOperation(parseInt(newValue));
+
+				this.setLastNumberToDisplay();
+			}	
 		}
 
-		//Adiciona um item na lista
-		//this._operation.push(value);
+	}
 
-		console.log(this._operation);
+	setLastNumberToDisplay(){
+		
 	}
 
 	execBtn(value){

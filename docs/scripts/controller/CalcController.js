@@ -90,6 +90,8 @@ class CalcController {
 	clearAll() {
 		//Limpa a lista de itens
 		this._operation = [];
+		this._lastNumber = '';
+		this._lastOperator = '';
 
 		this.setLastNumberToDisplay();
 	}
@@ -118,9 +120,7 @@ class CalcController {
 			if (this.isOperator(value)) {
 				//Troca o operador anterior
 				this.setLastOperation(value);
-			} else if (isNaN(value)) {
-				console.log("Outra coisa", value);
-			} else {
+			}else {
 				this.pushOperation(value);
 
 				this.setLastNumberToDisplay();
@@ -133,7 +133,7 @@ class CalcController {
 			} else {
 				//transforma o numero anterior e o digitado em string e concatena
 				let newValue = this.getLastOperation().toString() + value.toString();
-				this.setLastOperation(parseInt(newValue));
+				this.setLastOperation(parseFloat(newValue));
 
 				this.setLastNumberToDisplay();
 			}
@@ -167,6 +167,18 @@ class CalcController {
 		this.displayCalc = lastNumber;
 	}
 
+	addDot(){
+		let lastOperation = this.getLastOperation();
+
+		if(this.isOperator(lastOperation) || !lastOperation){
+			this.pushOperation('0.');
+		}else{
+			this.setLastOperation(lastOperation.toString() + '.');
+		}
+
+		this.setLastNumberToDisplay();
+	}
+
 	execBtn(value) {
 		switch (value) {
 			case "ac":
@@ -195,7 +207,7 @@ class CalcController {
 				break;
 
 			case "ponto":
-				this.addOperation(".");
+				this.addDot();
 				break;
 
 

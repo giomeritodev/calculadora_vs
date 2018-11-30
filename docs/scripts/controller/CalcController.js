@@ -1,13 +1,16 @@
-class CalcController{
+class CalcController {
 
-	constructor(){
+	constructor() {
+
+		this._lastOperator = '';
+		this._lastNumber = '';
 
 		this._locale = "pt-BR";
 
 		this._operation = [];
 		this._displayCalcEl = document.querySelector("#display");
-		this._dateEl        = document.querySelector("#data");
-		this._timeEl 	    = document.querySelector("#hora");
+		this._dateEl = document.querySelector("#data");
+		this._timeEl = document.querySelector("#hora");
 
 
 		this._currentDate;
@@ -15,126 +18,157 @@ class CalcController{
 		this.initButtonsEvents();
 	}
 
-	initialize(){
+	initialize() {
 
 		this.setDisplayDateTime();
-		
+
 		//Função para modificar Data e Hora dinamicamente
 		setInterval(() => {
-			this.setDisplayDateTime();	
+			this.setDisplayDateTime();
 		}, 1000);
 
-		this.setLastNumberToDisplay(); 
+		this.setLastNumberToDisplay();
 	}
 
-	pushOperation(value){
+	pushOperation(value) {
 		this._operation.push(value);
 
-		if(this._operation.length > 3){
-			this.calc();			
+		if (this._operation.length > 3) {
+			this.calc();
 		}
 	}
 
-	calc(){
-		let last = '';
-		
-		if(this._operation.length > 3){
-			last = this._operation.pop();
-		}
-		
-		let result = eval(this._operation.join(""));
+	getResult() {
+		return eval(this._operation.join(""));
+	}
 
-		if(last == '%'){
+	calc() {
+		let last = '';
+		this._lastOperator = this.getLastItem();
+
+		if (this._operation.length < 3) {
+			let firstItem = this._operation[0];
+			this._operation = [firstItem, this._lastOperator, this._lastNumber];
+		}
+
+		if (this._operation.length > 3) {
+			last = this._operation.pop();
+			this._lastNumber = this.getResult();
+
+		}else if (this._operation.length == 3) {
+
+			this._lastNumber = this.getLastItem(false);
+		}
+
+		console.log("Operador: ", this._lastOperator);
+		console.log("Número: ", this._lastNumber);
+
+		let result = this.getResult();
+
+		if (last == '%') {
 			result /= 100;
 			this._operation = [result];
-		}else{
+		} else {
 			this._operation = [result];
 
-			if(last) this._operation.push(last);
+			if (last) this._operation.push(last);
 		}
 
 
 		this.setLastNumberToDisplay();
 	}
 
-	setLastOperation(value){
-		this._operation[this._operation.length -1] = value;
+	setLastOperation(value) {
+		this._operation[this._operation.length - 1] = value;
 	}
 
 	//Pega ultimo elemonto do Array
-	getLastOperation(){
-		return this._operation[this._operation.length -1];
+	getLastOperation() {
+		return this._operation[this._operation.length - 1];
 	}
 
-	clearAll(){
+	clearAll() {
 		//Limpa a lista de itens
 		this._operation = [];
 
 		this.setLastNumberToDisplay();
 	}
-	clearEntry(){
+	clearEntry() {
 		//Elimina o ultimo item da lista
 		this._operation.pop();
 
 		this.setLastNumberToDisplay();
 	}
-	setError(){
+	setError() {
 		//Mostra no Display o nome ERRO
 		this.displayCalc = "Error";
 	}
 
-	isOperator(value){
+	isOperator(value) {
 		//verifica se o valor informado esta dentro deste array
 		return (['+', '-', '*', '%', '/'].indexOf(value) > -1);
 	}
 
-	addOperation(value){
+	addOperation(value) {
 
 		//Valida se o ultimo item da lista é um numero
-		if(isNaN(this.getLastOperation())){
-			
+		if (isNaN(this.getLastOperation())) {
+
 			//Valida o ultimo item e verifica qual foi digitado
-			if(this.isOperator(value)){
+			if (this.isOperator(value)) {
 				//Troca o operador anterior
 				this.setLastOperation(value);
-			}else if(isNaN(value)){
+			} else if (isNaN(value)) {
 				console.log("Outra coisa", value);
-			}else{
+			} else {
 				this.pushOperation(value);
 
 				this.setLastNumberToDisplay();
 			}
 
-		} else{
+		} else {
 
-			if(this.isOperator(value)){
+			if (this.isOperator(value)) {
 				this.pushOperation(value);
-			}else{
+			} else {
 				//transforma o numero anterior e o digitado em string e concatena
 				let newValue = this.getLastOperation().toString() + value.toString();
 				this.setLastOperation(parseInt(newValue));
 
 				this.setLastNumberToDisplay();
-			}	
+			}
 		}
 
 	}
 
-	setLastNumberToDisplay(){
-		let lastNumber;
-		for(let i =this._operation.length -1; i >= 0; i--){
-			if(!this.isOperator(this._operation[i])){
-				lastNumber = this._operation[i];
+	getLastItem(isOperator = true) {
+		let lastItem;
+
+		for (let i = this._operation.length - 1; i >= 0; i--) {
+			if (this.isOperator(this._operation[i]) == isOperator) {
+				lastItem = this._operation[i];
 				break;
 			}
-		}	
+		}
 
-		if(!lastNumber) lastNumber = 0;
+		if(!lastItem){
+			lastItem = (isOperator) ? this._lastOperator : this._lastNumber;
+		}
+
+		return lastItem;
+		
+	}
+
+	setLastNumberToDisplay() {
+
+		let lastNumber = this.getLastItem(false);
+
+		if (!lastNumber) lastNumber = 0;
 		this.displayCalc = lastNumber;
 	}
 
-	execBtn(value){
-		switch (value){
+	execBtn(value) {
+		switch (value) {
 			case "ac":
 				this.clearAll();
 				break;
@@ -158,13 +192,13 @@ class CalcController{
 				break;
 			case "igual":
 				this.calc();
-				break;	
+				break;
 
 			case "ponto":
 				this.addOperation(".");
-				break;	
-	
-				
+				break;
+
+
 			case "0":
 			case "1":
 			case "2":
@@ -180,17 +214,17 @@ class CalcController{
 
 			default:
 				this.setError();
-				break;						
+				break;
 		}
 	}
 	//Cria uma lista de eventos a ser executada
-	addEventListenerAll(element, events, fn){
+	addEventListenerAll(element, events, fn) {
 		events.split(' ').forEach(event => {
 			element.addEventListener(event, fn, false);
 		});
 	}
 
-	initButtonsEvents(){
+	initButtonsEvents() {
 		let buttons = document.querySelectorAll("#buttons > g, #parts > g");
 
 		buttons.forEach((btn, index) => {
@@ -202,14 +236,14 @@ class CalcController{
 			});
 
 			this.addEventListenerAll(btn, "mouseover mouseup mousedown", e => {
-				btn.style.cursor = "pointer";	
+				btn.style.cursor = "pointer";
 			});
 
 		})
 	}
 
 	//Metodo para pegar Data e Hora do sistema
-	setDisplayDateTime(){
+	setDisplayDateTime() {
 		this.displayDate = this.currentDate.toLocaleDateString(this._locale, {
 			day: "2-digit",
 			month: "long",
@@ -218,35 +252,35 @@ class CalcController{
 		this.displayTime = this.currentDate.toLocaleTimeString(this._locale);
 	}
 
-	get displayCalc(){
-		return this._displayCalcEl.innerHTML; 
+	get displayCalc() {
+		return this._displayCalcEl.innerHTML;
 	}
 
-	set displayCalc(value){
+	set displayCalc(value) {
 		this._displayCalcEl.innerHTML = value;
 	}
 
-	get currentDate(){ 
-		return new Date(); 
+	get currentDate() {
+		return new Date();
 	}
 
-	set currentDate(value){
+	set currentDate(value) {
 		this._currentDate = value;
 	}
 
-	get displayDate(){
+	get displayDate() {
 		return this._dateEl.innerHTML;
 	}
 
-	set displayDate(value){
+	set displayDate(value) {
 		this._dateEl.innerHTML = value;
 	}
 
-	get displayTime(){
+	get displayTime() {
 		return this._timeEl.innerHTML;
 	}
- 
-	set displayTime(value){
+
+	set displayTime(value) {
 		this._timeEl.innerHTML = value;
 	}
 }

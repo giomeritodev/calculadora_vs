@@ -16,6 +16,7 @@ class CalcController {
 		this._currentDate;
 		this.initialize();
 		this.initButtonsEvents();
+		this.initKeyboard();
 	}
 
 	initialize() {
@@ -55,7 +56,7 @@ class CalcController {
 			last = this._operation.pop();
 			this._lastNumber = this.getResult();
 
-		}else if (this._operation.length == 3) {
+		} else if (this._operation.length == 3) {
 
 			this._lastNumber = this.getLastItem(false);
 		}
@@ -120,7 +121,7 @@ class CalcController {
 			if (this.isOperator(value)) {
 				//Troca o operador anterior
 				this.setLastOperation(value);
-			}else {
+			} else {
 				this.pushOperation(value);
 
 				this.setLastNumberToDisplay();
@@ -151,12 +152,12 @@ class CalcController {
 			}
 		}
 
-		if(!lastItem){
+		if (!lastItem) {
 			lastItem = (isOperator) ? this._lastOperator : this._lastNumber;
 		}
 
 		return lastItem;
-		
+
 	}
 
 	setLastNumberToDisplay() {
@@ -167,18 +168,61 @@ class CalcController {
 		this.displayCalc = lastNumber;
 	}
 
-	addDot(){
+	addDot() {
 		let lastOperation = this.getLastOperation();
 
-		if(typeof lastOperation === 'string' && lastOperation.split('').indexOf('.') > -1) return;
+		if (typeof lastOperation === 'string' && lastOperation.split('').indexOf('.') > -1) return;
 
-		if(this.isOperator(lastOperation) || !lastOperation){
+		if (this.isOperator(lastOperation) || !lastOperation) {
 			this.pushOperation('0.');
-		}else{
+		} else {
 			this.setLastOperation(lastOperation.toString() + '.');
 		}
 
 		this.setLastNumberToDisplay();
+	}
+
+	initKeyboard() {
+		document.addEventListener('keyup', e => {
+			switch (e.key) {
+				case "Escape":
+					this.clearAll();
+					break;
+				case "Backspace":
+					this.clearEntry();
+					break;
+				case "+":					
+				case "-":
+				case "/":
+				case "*":
+				case "%":
+					this.addOperation(e.key);
+					break;
+				case "Enter":
+				case "=":
+					this.calc();
+					break;
+
+				case ".":
+				case ",":
+					this.addDot();
+					break;
+
+
+				case "0":
+				case "1":
+				case "2":
+				case "3":
+				case "4":
+				case "5":
+				case "6":
+				case "7":
+				case "8":
+				case "9":
+					this.addOperation(parseInt(e.key));
+					break;
+			}
+		});
 	}
 
 	execBtn(value) {

@@ -61,9 +61,6 @@ class CalcController {
 			this._lastNumber = this.getLastItem(false);
 		}
 
-		console.log("Operador: ", this._lastOperator);
-		console.log("Número: ", this._lastNumber);
-
 		let result = this.getResult();
 
 		if (last == '%') {
@@ -182,6 +179,18 @@ class CalcController {
 		this.setLastNumberToDisplay();
 	}
 
+	copyToClipboard(){
+		let input = document.createElement('input');
+
+		input.value = this.displayCalc;
+
+		document.body.appendChild(input);
+		input.select();
+		document.execCommand('Copy');
+
+		input.remove();
+	}
+
 	initKeyboard() {
 		document.addEventListener('keyup', e => {
 			switch (e.key) {
@@ -220,6 +229,10 @@ class CalcController {
 				case "8":
 				case "9":
 					this.addOperation(parseInt(e.key));
+					break;
+
+				case 'c':
+					if(e.ctrlKey) this.copyToClipboard();
 					break;
 			}
 		});

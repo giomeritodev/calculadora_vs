@@ -29,6 +29,7 @@ class CalcController {
 		}, 1000);
 
 		this.setLastNumberToDisplay();
+		this.pasteFromClipboard(); 
 	}
 
 	pushOperation(value) {
@@ -177,6 +178,15 @@ class CalcController {
 		}
 
 		this.setLastNumberToDisplay();
+	}
+
+	pasteFromClipboard(){
+
+		document.addEventListener('paste', e => {
+			let text = e.clipboardData.getData('Text');
+
+			this.displayCalc = parseFloat(text);
+		});
 	}
 
 	copyToClipboard(){
